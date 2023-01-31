@@ -26,40 +26,44 @@ def create_country_files(rootdir: str):
 
         if 'lyrics_tr' in subdir:
             full = ''
+            if 'full_lyrics_clean.txt' in files:
+                pass
 
-            for file in files:
-                print(f'Joining {file}')
-                content_clean = ''
-                f = open(os.path.join(subdir, file), 'r')
-                for sentence in f.readlines():
-                    if 'Translations' in sentence:
-                        continue
-                    else:
-                        content_clean += sentence
-                        
-                full = full + '\n' + content_clean
+            else:
 
-                f.close()
+                for file in files:
+                    print(f'Joining {file}')
+                    content_clean = ''
+                    f = open(os.path.join(subdir, file), 'r')
+                    for sentence in f.readlines():
+                        if 'Translations' in sentence:
+                            continue
+                        else:
+                            content_clean += sentence
+                            
+                    full = full + '\n' + content_clean
 
-                full = re.sub(r'[\(\[].*?[\)\]]', '', full) # remove identifiers like chorus, verse, etc...
-                full = os.linesep.join([s for s in full.splitlines() if s]) # remove empty lines
-                full = full.replace('\n', ' ') # replace the \n newline thingie's with empty space
+                    f.close()
 
-            # write file in original language
-            text_file = open(os.path.join(subdir[:-10], 'full_lyrics_clean.txt'), 'w')
-            text_file.write(full)
-            text_file.close()
+                    full = re.sub(r'[\(\[].*?[\)\]]', '', full) # remove identifiers like chorus, verse, etc...
+                    full = os.linesep.join([s for s in full.splitlines() if s]) # remove empty lines
+                    full = full.replace('\n', ' ') # replace the \n newline thingie's with empty space
 
-            # append translation to the all countries file
-            all_countries['country'].append(subdir[-12:-10])
-            all_countries['lyrics'].append(full)
-            all_countries['wordcount'].append(round(len(full.split(' ')) / len(files), 0))
-            
-            # filter out 'stopwords' and words shorter than 2 letters long
-            filtered_words_f = [word for word in full.split(' ') if word not in stopwords.words('english')
-                                    and len(word) > 3 and word not in ['na', 'la']]
-                                
-            all_countries['lexrich'].append(round(len(list(set(filtered_words_f))) / len(files), 0))
+                # write file in original language
+                text_file = open(os.path.join(subdir[:-10], 'full_lyrics_clean.txt'), 'w')
+                text_file.write(full)
+                text_file.close()
+
+                # append translation to the all countries file
+                all_countries['country'].append(subdir[-12:-10])
+                all_countries['lyrics'].append(full)
+                all_countries['wordcount'].append(round(len(full.split(' ')) / len(files), 0))
+                
+                # filter out 'stopwords' and words shorter than 2 letters long
+                filtered_words_f = [word for word in full.split(' ') if word not in stopwords.words('english')
+                                        and len(word) > 3 and word not in ['na', 'la']]
+                                    
+                all_countries['lexrich'].append(round(len(list(set(filtered_words_f))) / len(files), 0))
                             
     
     return all_countries
@@ -166,6 +170,6 @@ def sentiment_analyzer_hf(rootdir):
     data = ['jhi', 'my', 'name', 'is', 'dimarco']
 
 #create_country_files(rootdir='/home/oscar/newsletter/spotify/data')
-#graphs(rootdir=rootdir)
+graphs(rootdir=rootdir)
 #word_cloud(rootdir=rootdir)
-sentiment_analyzer_hf(rootdir=rootdir)
+#sentiment_analyzer_hf(rootdir=rootdir)
