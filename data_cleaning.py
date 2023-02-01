@@ -72,8 +72,6 @@ def graphs(rootdir:str):
 
     df = pd.read_csv(rootdir + '/all_countries.csv')
 
-    print(df.head(5))
-
     if df.shape[0] == 0:
         list_lyrics = create_country_files(rootdir=rootdir)
         df = pd.DataFrame(list_lyrics)
@@ -95,10 +93,16 @@ def graphs(rootdir:str):
 
 def word_cloud(rootdir: str):
     '''This function creates a wordcloud based on the countries lyrics'''
-    
-    list_lyrics = create_country_files(rootdir=rootdir)
 
-    df = pd.DataFrame(list_lyrics)
+    df = pd.read_csv(rootdir + '/all_countries.csv')
+
+    if df.shape[0] == 0:
+        list_lyrics = create_country_files(rootdir=rootdir)
+
+        df = pd.DataFrame(list_lyrics)
+    
+    else:
+        pass
 
     for index, row in df.iterrows():
         #all_words = ' '.join(row['lyrics'])
@@ -112,6 +116,7 @@ def word_cloud(rootdir: str):
         plt.figure()
         plt.imshow(wordcloud, interpolation='bilinear')
         plt.axis('off')
+        plt.title(row['year'])
         plt.show()
 
 
@@ -178,5 +183,5 @@ def sentiment_analyzer_hf(rootdir):
 
 #create_country_files(rootdir=rootdir)
 graphs(rootdir=rootdir)
-#word_cloud(rootdir=rootdir)
+word_cloud(rootdir=rootdir)
 #sentiment_analyzer_hf(rootdir=rootdir)
