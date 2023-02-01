@@ -12,69 +12,76 @@ import pandas as pd
 import plotly.graph_objects as go
 from wordcloud import WordCloud, STOPWORDS
 
-rootdir = '/home/oscar/newsletter/spotify/data'
+rootdir = '/home/oscar/newsletter/spotify/data2ndpost100'
 
 def create_country_files(rootdir: str):
     '''This function takes all the subfolders with the lyrics files from the
     respective country and joins them togethere into one full_lyrics.txt file'''
 
     # initialize list of strings to populate with the translated lyrics
-    all_countries = {'country': [], 'lyrics': [], 'wordcount': [], 'lexrich': []}
+    all_countries = {'year': [], 'lyrics': [], 'wordcount': [], 'lexrich': []}
 
     # loop over all the lyrics files in the countries folders
     for subdir, dirs, files in os.walk(rootdir):
 
-        if 'lyrics_tr' in subdir:
+        if 'lyrics' in subdir:
             full = ''
-            if 'full_lyrics_clean.txt' in files:
-                pass
 
-            else:
+            for file in files:
+                print(f'Joining {file}')
+                content_clean = ''
+                f = open(os.path.join(subdir, file), 'r')
+                for sentence in f.readlines():
+                    if 'Translations' in sentence or 'Lyrics' in sentence:
+                        continue
+                    else:
+                        content_clean += sentence
+                        
+                full = full + '\n' + content_clean
 
-                for file in files:
-                    print(f'Joining {file}')
-                    content_clean = ''
-                    f = open(os.path.join(subdir, file), 'r')
-                    for sentence in f.readlines():
-                        if 'Translations' in sentence:
-                            continue
-                        else:
-                            content_clean += sentence
-                            
-                    full = full + '\n' + content_clean
+                f.close()
 
-                    f.close()
+                full = re.sub(r'[\(\[].*?[\)\]]', '', full) # remove identifiers like chorus, verse, etc...
+                full = os.linesep.join([s for s in full.splitlines() if s]) # remove empty lines
+                full = full.replace('\n', ' ') # replace the \n newline thingie's with empty space
 
-                    full = re.sub(r'[\(\[].*?[\)\]]', '', full) # remove identifiers like chorus, verse, etc...
-                    full = os.linesep.join([s for s in full.splitlines() if s]) # remove empty lines
-                    full = full.replace('\n', ' ') # replace the \n newline thingie's with empty space
+            # write file in original language
+            text_file = open(os.path.join(subdir[:-7], 'full_lyrics_clean.txt'), 'w')
+            text_file.write(full)
+            text_file.close()
 
-                # write file in original language
-                text_file = open(os.path.join(subdir[:-10], 'full_lyrics_clean.txt'), 'w')
-                text_file.write(full)
-                text_file.close()
+            # append translation to the all countries file
+            all_countries['year'].append(subdir[-12:-7])
+            all_countries['lyrics'].append(full)
+            all_countries['wordcount'].append(round(len(full.split(' ')) / len(files), 0))
+            
+            # filter out 'stopwords' and words shorter than 2 letters long
+            filtered_words_f = [word for word in full.split(' ') if word not in stopwords.words('english')
+                                    and len(word) > 3 and word not in ['na', 'la']]
+                                
+            all_countries['lexrich'].append(round(len(list(set(filtered_words_f))) / len(files), 0))
 
-                # append translation to the all countries file
-                all_countries['country'].append(subdir[-12:-10])
-                all_countries['lyrics'].append(full)
-                all_countries['wordcount'].append(round(len(full.split(' ')) / len(files), 0))
-                
-                # filter out 'stopwords' and words shorter than 2 letters long
-                filtered_words_f = [word for word in full.split(' ') if word not in stopwords.words('english')
-                                        and len(word) > 3 and word not in ['na', 'la']]
-                                    
-                all_countries['lexrich'].append(round(len(list(set(filtered_words_f))) / len(files), 0))
-                            
-    
+
+    df_all_countries = pd.DataFrame.from_dict(all_countries)                    
+    df_all_countries.to_csv('all_countries.csv')
     return all_countries
 
 def graphs(rootdir:str):
     '''This function produces two bar charts based on the lyrics manipulated in
         create_country_files'''
 
-    list_lyrics = create_country_files(rootdir=rootdir)
+    df = pd.read_csv(rootdir + '/all_countries.csv')
 
-    df = pd.DataFrame(list_lyrics)
+    print(df.head(5))
+
+    if df.shape[0] == 0:
+        list_lyrics = create_country_files(rootdir=rootdir)
+        df = pd.DataFrame(list_lyrics)
+
+    else:
+        pass
+
+    df = df.sort_values('lexrich', ascending=True)
 
     # fig = go.Figure(go.Bar(
     #             x=df['country'],
@@ -82,8 +89,8 @@ def graphs(rootdir:str):
     # fig.show()
 
     fig = go.Figure(go.Bar(
-                x=df['country'],
-                y=df['lexrich']))
+        x=df['year'],
+        y=df['lexrich']))
     fig.show()
 
 def word_cloud(rootdir: str):
@@ -117,7 +124,7 @@ def sentiment_analyzer(rootdir: str):
 
     df = pd.DataFrame(list_lyrics)
 
-    results = pd.DataFrame(columns=('country', 'superpos', 'pos',  'neu', 'neg', 'superneg'))
+    results = pd.DataFrame(columns=('year', 'superpos', 'pos',  'neu', 'neg', 'superneg'))
     for index, row in df.iterrows():
         #all_words = ' '.join(row['lyrics'])
 
@@ -157,7 +164,7 @@ def sentiment_analyzer(rootdir: str):
         perc_superpos = (superpos/num_total)*100
         perc_superneg = (superneg/num_total)*100
 
-        results.loc[len(results)] = [row['country'], perc_neu, perc_pos, perc_neg,
+        results.loc[len(results)] = [row['year'], perc_neu, perc_pos, perc_neg,
                                                      perc_superpos, perc_superneg]  
     
     results.plot.bar(x='country', stacked=True)
@@ -169,7 +176,7 @@ def sentiment_analyzer_hf(rootdir):
 
     data = ['jhi', 'my', 'name', 'is', 'dimarco']
 
-#create_country_files(rootdir='/home/oscar/newsletter/spotify/data')
+#create_country_files(rootdir=rootdir)
 graphs(rootdir=rootdir)
 #word_cloud(rootdir=rootdir)
 #sentiment_analyzer_hf(rootdir=rootdir)
