@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 import requests
 from lyricsgenius import Genius
 import os.path
+import tqdm
 
 
 def get_country_data(playlist_link: str):
@@ -31,7 +32,7 @@ def get_country_data(playlist_link: str):
 
     tracks = sp.playlist_tracks(playlist_link)
 
-    saving_csv_name = 'track_features_SA.csv'
+    saving_csv_name = 'track_features_2010s2.csv'
 
     # Initialize pandas dataframe to populate with track features
     track_feature_pd = pd.DataFrame(columns=['danceability',
@@ -57,7 +58,7 @@ def get_country_data(playlist_link: str):
                                             )
 
     # Loop over all tracks in the tracks['items'] list
-    for track in tracks['items']:
+    for track in tqdm.tqdm(tracks['items']):
         '''Get track data'''
         track_name = track['track']['name']
         track_popularity = track['track']['popularity']
@@ -109,4 +110,4 @@ def get_country_data(playlist_link: str):
     track_feature_pd.to_csv(saving_csv_name)
 
 
-get_country_data('https://open.spotify.com/playlist/37i9dQZEVXbKqiTGXuCOsB?si=2523166715984c94')
+get_country_data('https://open.spotify.com/playlist/37i9dQZF1DX5Ejj0EkURtP?si=70c3cee8971c4a28')

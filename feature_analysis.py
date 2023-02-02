@@ -5,7 +5,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 # define path of data
-path = '/home/oscar/newsletter/spotify/data'
+path = '/home/oscar/newsletter/spotify/data2ndpost100'
 
 # define the list of columns that we care about
 cols_of_interest = ['danceability',
@@ -19,77 +19,45 @@ cols_of_interest = ['danceability',
                     'tempo',
                     'duration_ms',
                     'song_title',
-                    'popularity']
+                    'popularity',
+                    'decade']
 
 # read individual features
-features_BR = pd.read_csv(path + '/BR/track_features_BR.csv', usecols=cols_of_interest)
-features_CA = pd.read_csv(path + '/CA/track_features_CA.csv', usecols=cols_of_interest)
-features_CN = pd.read_csv(path + '/CN/track_features_CN.csv', usecols=cols_of_interest)
-features_DE = pd.read_csv(path + '/DE/track_features_DE.csv', usecols=cols_of_interest)
-features_ES = pd.read_csv(path + '/ES/track_features_ES.csv', usecols=cols_of_interest)
-features_FI = pd.read_csv(path + '/FI/track_features_FI.csv', usecols=cols_of_interest)
-features_FR = pd.read_csv(path + '/FR/track_features_FR.csv', usecols=cols_of_interest)
-features_IN = pd.read_csv(path + '/IN/track_features_IN.csv', usecols=cols_of_interest)
-features_IT = pd.read_csv(path + '/IT/track_features_IT.csv', usecols=cols_of_interest)
-features_JP = pd.read_csv(path + '/JP/track_features_JP.csv', usecols=cols_of_interest)
-features_KE = pd.read_csv(path + '/KE/track_features_KE.csv', usecols=cols_of_interest)
-features_KO = pd.read_csv(path + '/KO/track_features_KO.csv', usecols=cols_of_interest)
-features_MX = pd.read_csv(path + '/MX/track_features_MX.csv', usecols=cols_of_interest)
-features_PH = pd.read_csv(path + '/PH/track_features_PH.csv', usecols=cols_of_interest)
-features_PT = pd.read_csv(path + '/PT/track_features_PT.csv', usecols=cols_of_interest)
-features_RU = pd.read_csv(path + '/RU/track_features_RU.csv', usecols=cols_of_interest)
-features_SA = pd.read_csv(path + '/SA/track_features_SA.csv', usecols=cols_of_interest)
-features_TU = pd.read_csv(path + '/TU/track_features_TU.csv', usecols=cols_of_interest)
-features_UK = pd.read_csv(path + '/UK/track_features_UK.csv', usecols=cols_of_interest)
-features_US = pd.read_csv(path + '/US/track_features_US.csv', usecols=cols_of_interest)
+features_50 = pd.read_csv(path + '/1950/track_features_1950s.csv', usecols=cols_of_interest)
+features_60 = pd.read_csv(path + '/1960/track_features_1960s.csv', usecols=cols_of_interest)
+features_70 = pd.read_csv(path + '/1970/track_features_1970s.csv', usecols=cols_of_interest)
+features_80 = pd.read_csv(path + '/1980/track_features_1980s.csv', usecols=cols_of_interest)
+features_90 = pd.read_csv(path + '/1990/track_features_1990s.csv', usecols=cols_of_interest)
+features_00 = pd.read_csv(path + '/2000/track_features_2000s.csv', usecols=cols_of_interest)
+features_10 = pd.read_csv(path + '/2010/track_features_2010s.csv', usecols=cols_of_interest)
+features_20 = pd.read_csv(path + '/2020/track_features_2020s.csv', usecols=cols_of_interest)
 
 # concatenate features
-features = pd.concat([features_BR,
-                      features_CA,
-                      features_CN,
-                      features_DE,
-                      features_ES,
-                      features_FI,
-                      features_FR,
-                      features_IN,
-                      features_IT,
-                      features_JP,
-                      features_KO,
-                      features_KE,
-                      features_MX,
-                      features_PH,
-                      features_PT,
-                      features_RU,
-                      features_SA,
-                      features_TU,
-                      features_UK,
-                      features_US])
+features = pd.concat([features_50,
+                      features_60,
+                      features_70,
+                      features_80,
+                      features_90,
+                      features_00,
+                      features_10,
+                      features_20])
 
-country_list = (['Brazil'] * 100 + ['Canada'] * 100 + ['China'] * 100 + ['Germany'] * 100 +
-                ['Spain'] * 100 + ['Finland'] * 100 + ['France'] * 100 + ['Japan'] * 100 +
-                ['India'] * 100 + ['Italy'] * 100 + ['Kenia'] * 100 + ['Korea'] * 100 +
-                ['Mexico'] * 100 + ['Philippines'] * 100 + ['Portugal'] * 100 + ['Russia'] * 100 +
-                ['South Africa'] * 100 + ['Turkey'] * 100 + ['UK'] * 100 + ['USA'] * 100)
-
-features['Country'] = country_list
 features['duration_ms'] = features['duration_ms'] / 60000
 
 features = features.rename(columns={'energy' : 'Energy',
                                     'loudness': 'Loudness [dB]',
                                     'duration_ms': 'Duration [Min]'})
 
-features_select = features[features['Country'].isin(['China', 'Kenia', 'Germany', 'Japan', 'Mexico'])]
-
 ####
 # Plot
-# fig = px.scatter(features_select,
+# fig = px.scatter(features,
 #                  x= 'valence',
 #                  y ='tempo',
-#                  color='Country',
+#                  color='decade',
 #                  size='popularity',
-#                  marginal_x='histogram',
+#                  marginal_x='histogram')
 #                  #marginal_y='histogram',
-#                  facet_col='Country') # pa ver tol rollo de marginal https://plotly.com/python/marginal-plots/
+#                  #facet_col='Country') # pa ver tol rollo de marginal https://plotly.com/python/marginal-plots/
 
 
 # fig.update_layout(
@@ -127,7 +95,7 @@ features_select = features[features['Country'].isin(['China', 'Kenia', 'Germany'
 
 ### Violin Plots
 
-# fig = px.violin(features_select, y = 'danceability', color='Country')
+# fig = px.violin(features, y = 'valence', color='decade')
 # fig.show()
 
 ###
@@ -289,54 +257,40 @@ features_select = features[features['Country'].isin(['China', 'Kenia', 'Germany'
 ### QUITAR TODOS LOS REPETIDOS SONGS, PORQUE SI ESTAN EN TODOS LADOS, NO TIENE SENTIDO
 
 # Mean analyisis:
-features_mean = pd.concat([pd.DataFrame(features_BR.mean(axis=0, numeric_only=True)).transpose(),
-                           pd.DataFrame(features_CA.mean(axis=0, numeric_only=True)).transpose(),
-                           pd.DataFrame(features_CN.mean(axis=0, numeric_only=True)).transpose(),
-                           pd.DataFrame(features_DE.mean(axis=0, numeric_only=True)).transpose(),
-                           pd.DataFrame(features_ES.mean(axis=0, numeric_only=True)).transpose(),
-                           pd.DataFrame(features_FI.mean(axis=0, numeric_only=True)).transpose(),
-                           pd.DataFrame(features_FR.mean(axis=0, numeric_only=True)).transpose(),
-                           pd.DataFrame(features_IN.mean(axis=0, numeric_only=True)).transpose(),
-                           pd.DataFrame(features_IT.mean(axis=0, numeric_only=True)).transpose(),
-                           pd.DataFrame(features_JP.mean(axis=0, numeric_only=True)).transpose(),
-                           pd.DataFrame(features_KO.mean(axis=0, numeric_only=True)).transpose(),
-                           pd.DataFrame(features_KE.mean(axis=0, numeric_only=True)).transpose(),
-                           pd.DataFrame(features_MX.mean(axis=0, numeric_only=True)).transpose(),
-                           pd.DataFrame(features_PH.mean(axis=0, numeric_only=True)).transpose(),
-                           pd.DataFrame(features_PT.mean(axis=0, numeric_only=True)).transpose(),
-                           pd.DataFrame(features_RU.mean(axis=0, numeric_only=True)).transpose(),
-                           pd.DataFrame(features_SA.mean(axis=0, numeric_only=True)).transpose(),
-                           pd.DataFrame(features_TU.mean(axis=0, numeric_only=True)).transpose(),
-                           pd.DataFrame(features_UK.mean(axis=0, numeric_only=True)).transpose(),
-                           pd.DataFrame(features_US.mean(axis=0, numeric_only=True)).transpose()])
+features_mean = pd.concat([pd.DataFrame(features_50.mean(axis=0, numeric_only=True)).transpose(),
+                           pd.DataFrame(features_60.mean(axis=0, numeric_only=True)).transpose(),
+                           pd.DataFrame(features_70.mean(axis=0, numeric_only=True)).transpose(),
+                           pd.DataFrame(features_80.mean(axis=0, numeric_only=True)).transpose(),
+                           pd.DataFrame(features_90.mean(axis=0, numeric_only=True)).transpose(),
+                           pd.DataFrame(features_00.mean(axis=0, numeric_only=True)).transpose(),
+                           pd.DataFrame(features_10.mean(axis=0, numeric_only=True)).transpose(),
+                           pd.DataFrame(features_20.mean(axis=0, numeric_only=True)).transpose()])
 
-features_mean['Country'] = ['Brazil','Canada', 'China','Germany', 'Spain', 'Finland', 'France',
-                            'India', 'Italy', 'Japan', 'Korea', 'Kenia', 'Mexico', 'Portugal',
-                            'Philippines', 'Russia', 'South Africa', 'Turkey', 'UK', 'US']
+features_mean['decade'] = ['50s', '60s', '70s', '80s', '90s', '2000s', '2010s', '2020s']
 
 
-# df = features_mean
-# fig = px.scatter(df, x='valence', y='danceability', color='Country',
-#                  size = 'popularity', text = 'Country')
-# fig.update_traces(textposition="top center")
+df = features_mean
+fig = px.scatter(df, x='valence', y='danceability', color='decade',
+                 size = 'popularity', text = 'decade')
+fig.update_traces(textposition="top center")
 
-# fig.update_layout(
-#     font = dict(
-#         size = 30
-#     ),
+fig.update_layout(
+    font = dict(
+        size = 30
+    ),
 
-#     xaxis = dict(
-#         title = 'Valence',
-#         range = [0, 1]
-#     ),
+    xaxis = dict(
+        title = 'Valence',
+        range = [0, 1]
+    ),
 
-#     yaxis = dict(
-#         title = 'Danceability',
-#         range = [0,1]
-#     )
-# )
+    yaxis = dict(
+        title = 'Danceability',
+        range = [0,1]
+    )
+)
 
-# fig.show()
+fig.show()
 
 ### Side bar chart
 
