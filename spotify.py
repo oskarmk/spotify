@@ -101,17 +101,11 @@ class SpotifyLyricsScraper():
         # adjust name of .csv file to be named how you want
         track_feature_pd.to_csv('track_features_US.csv')
 
-test = SpotifyLyricsScraper(user_id = '4ag73vuzx8ldp7by0442uic3g',
-     client_id = 'ed4d5bfd956442c2a1c093d3a3942aa2',
-     client_secret = 'cdcc72470e684ec19527cb283f01baa5',
-     genius_id = 'QRLI3NSZJwB8lD22xq3hEN923Dw_U7Uk1BoYAMfnQgq5ejtGBhZLAxbBeGmKqag1',
+test = SpotifyLyricsScraper(user_id = 'YOUR_SPOTIFY_USER_ID',
+     client_id = 'YOUR_CLIENT_ID,
+     client_secret = 'YOUR_CLIENT_SECRET',
+     genius_id = 'YOUR_GENIUS_ID',
      playlist_link = 'https://open.spotify.com/playlist/5ABHKGoOzxkaa28ttQV9sE?si=3056f1cb35584b48')
-
-# SpotifyLyricsScraper(user_id = '4ag73vuzx8ldp7by0442uic3g',
-#      client_id = 'ed4d5bfd956442c2a1c093d3a3942aa2',
-#      client_secret = 'cdcc72470e684ec19527cb283f01baa5',
-#      genius_id = 'QRLI3NSZJwB8lD22xq3hEN923Dw_U7Uk1BoYAMfnQgq5ejtGBhZLAxbBeGmKqag1',
-#      playlist_link = 'https://open.spotify.com/playlist/5ABHKGoOzxkaa28ttQV9sE?si=3056f1cb35584b48')
 
 test.setup_connections()
 test.get_country_data()
