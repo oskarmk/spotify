@@ -18,16 +18,16 @@ def get_country_data(playlist_link: str):
                .csv file with the song features'''
 
     ### Setup:
-    # These are extracted from: https://developer.spotify.com/dashboard/applications/ed4d5bfd956442c2a1c093d3a3942aa2
-    user_id = '4ag73vuzx8ldp7by0442uic3g' # my personal account user_id --> lo que utilizo pa meterme
-    client_id = 'ed4d5bfd956442c2a1c093d3a3942aa2'
-    client_secret = 'cdcc72470e684ec19527cb283f01baa5'
+    # These are extracted from: https://developer.spotify.com/dashboard/applications/...
+    user_id = 'YOUR_USER_ID' # my personal account user_id --> lo que utilizo pa meterme
+    client_id = 'YOUR_CLIENT_ID'
+    client_secret = 'YOUR_CLIENT_SECRET'
 
     client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
     sp = spotipy.Spotify(client_credentials_manager = client_credentials_manager)
 
     # Genius Token
-    genius = Genius('QRLI3NSZJwB8lD22xq3hEN923Dw_U7Uk1BoYAMfnQgq5ejtGBhZLAxbBeGmKqag1',
+    genius = Genius('YOUR_GENIUS_ID',
                     timeout=20)
 
     tracks = sp.playlist_tracks(playlist_link)
