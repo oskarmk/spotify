@@ -101,11 +101,11 @@ class SpotifyLyricsScraper():
         # adjust name of .csv file to be named how you want
         track_feature_pd.to_csv('track_features_US.csv')
 
-test = SpotifyLyricsScraper(user_id = 'YOUR_SPOTIFY_USER_ID',
-     client_id = 'YOUR_CLIENT_ID,
-     client_secret = 'YOUR_CLIENT_SECRET',
-     genius_id = 'YOUR_GENIUS_ID',
-     playlist_link = 'https://open.spotify.com/playlist/5ABHKGoOzxkaa28ttQV9sE?si=3056f1cb35584b48')
+test = SpotifyLyricsScraper(user_id = 'YOUR_SPOTIFY_USERID',
+     client_id = 'YOUR_SPOTIFY_CLIENT_ID',
+     client_secret = 'YOUR_SPOTIFY_CLIENT SECRET',
+     genius_id = 'YOUR_GENIUS ID',
+     playlist_link = 'LINK_TO_SPOTIFY_PLAYLIST')
 
 test.setup_connections()
 test.get_country_data()
