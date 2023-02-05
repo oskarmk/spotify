@@ -21,8 +21,10 @@ from nltk.stem.wordnet import WordNetLemmatizer # groups together inflected grou
 
 lyric_corpus_tokenized = []
 
-decade = '1950'
-path = f'/home/oscar/newsletter/spotify/data2ndpost100/{decade}/lyrics'
+# decade = '1950'
+# path = f'/home/oscar/newsletter/spotify/data2ndpost100/{decade}/lyrics'
+
+path = '/home/oscar/newsletter/spotify/data2ndpost100/Conglomerate'
 
 for filename in os.listdir(path):
     
