@@ -53,13 +53,13 @@ def create_country_files(rootdir: str):
             text_file.close()
 
             # append translation to the all countries file
-            all_countries['year'].append(subdir[-12:-7])
+            all_countries['year'].append(subdir[-11:-7])
             all_countries['lyrics'].append(full)
             all_countries['wordcount'].append(round(len(full.split(' ')) / len(files), 0))
 
             # filter out 'stopwords' and words shorter than 2 letters long
             filtered_words_f = [word for word in full.split(' ') if word not in stopwords.words('english')
-                                    and len(word) > 3 and word not in ['na', 'la']]
+                                    and len(word) > 3 and word not in ['na', 'la', 'chorus','verse']]
 
             all_countries['lexrich'].append(round(len(list(set(filtered_words_f))) / len(files), 0))
 
@@ -69,7 +69,7 @@ def create_country_files(rootdir: str):
     return all_countries
 
 def graphs(rootdir:str):
-    '''This function produces two bar charts based on the lyrics manipulated in
+    '''This function produces a line chart based on the lyrics manipulated in
         create_country_files'''
 
     df = pd.read_csv(rootdir + '/all_countries.csv')
@@ -80,13 +80,9 @@ def graphs(rootdir:str):
 
     else:
         pass
+    
 
-    df = df.sort_values('lexrich', ascending=True)
-
-    # fig = go.Figure(go.Bar(
-    #             x=df['country'],
-    #             y=df['wordcount']))
-    # fig.show()
+    df = df.sort_values('year', ascending=True)
 
     fig = go.Figure(go.Bar(
         x=df['year'],
@@ -94,7 +90,7 @@ def graphs(rootdir:str):
     fig.show()
 
 def word_cloud(rootdir: str):
-    '''This function creates a wordcloud based on the countries lyrics'''
+    '''This function creates a wordcloud chart based on the countries lyrics'''
 
     df = pd.read_csv(rootdir + '/all_countries.csv')
 
@@ -107,7 +103,6 @@ def word_cloud(rootdir: str):
         pass
 
     for index, row in df.iterrows():
-        #all_words = ' '.join(row['lyrics'])
 
         lyrics = row['lyrics'].replace('-', ' ')
 
@@ -123,7 +118,7 @@ def word_cloud(rootdir: str):
 
 
 def sentiment_analyzer(rootdir: str):
-    '''nltk Sentiment analyzer for the lyrics in the different decades'''
+    '''nltk Sentiment analyzer for the lyrics in the different decades: Subsequently it plots a line chart with the sentiments'''
 
     df = pd.DataFrame(columns=('artist', 'pos', 'neu', 'neg'))
     sid = SentimentIntensityAnalyzer()
@@ -156,7 +151,7 @@ def sentiment_analyzer(rootdir: str):
             comp = sid.polarity_scores(item)
             comp = comp['compound']
 
-            if comp >= 0.5:
+            if comp >= 0.6:
                 superpos += 1
             elif comp >= 0.15 and comp < 0.5:
                 pos += 1
@@ -174,19 +169,138 @@ def sentiment_analyzer(rootdir: str):
         perc_superpos = (superpos/num_total)*100
         perc_superneg = (superneg/num_total)*100
 
-        results.loc[len(results)] = [row['year'], perc_neu, perc_pos, perc_neg,
-                                                     perc_superpos, perc_superneg]
+        results.loc[len(results)] = [(row['year'][-4:]), perc_superpos, perc_pos, perc_neu,
+                                                     perc_neg, perc_superneg]
 
-    results.plot.bar(x='decade', stacked=True)
-    plt.show()
+    results = results.sort_values('decade', ascending=True)
 
-def sentiment_analyzer_hf(rootdir):
-    from transformers import pipeline
-    sentiment_pipeline = pipeline(model='sentiment-analysis')
+    results['decade'] = results['decade'] + 's'
+    # results.plot.line(x='decade')
+    # plt.show()
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        y = results['superpos'],
 
-    data = ['jhi', 'my', 'name', 'is', 'dimarco']
+        x = results['decade'],
+        name= 'Strongly Positive',
+        mode= 'lines+markers',
+        line=dict(
+            color='rgba(38, 102, 14, 1)',
+            shape='spline',
+            width=4
+            ),
+        marker=dict(
+            symbol="arrow",
+            size=20,
+            angleref="previous",
+            ))
+    )
+
+    fig.add_trace(go.Scatter(
+        y = results['pos'],
+
+        x = results['decade'],
+        name= 'Positive',
+        mode= 'lines+markers',
+        line=dict(
+            color='rgba(83, 217, 33, 1)',
+            shape='spline',
+            width=4
+            ),
+        marker=dict(
+            symbol="arrow",
+            size=20,
+            angleref="previous",
+            ))
+    )
+
+    fig.add_trace(go.Scatter(
+        y = results['neg'],
+
+        x = results['decade'],
+        name= 'Negative',
+        mode= 'lines+markers',
+        line=dict(
+            color='rgba(242, 10, 10, 0.8)',
+            shape='spline',
+            width = 4
+            ),
+        marker=dict(
+            symbol="arrow",
+            size=20,
+            angleref="previous",
+            ))
+    )
+
+    fig.add_trace(go.Scatter(
+        y = results['superneg'],
+
+        x = results['decade'],
+        name= 'Strongly Negative',
+        mode= 'lines+markers',
+        line=dict(
+            color='rgba(140, 18, 18, 0.8)',
+            shape='spline',
+            width=4
+            ),
+        marker=dict(
+            symbol="arrow",
+            size=20,
+            angleref="previous",
+            ))
+    )
+
+
+    # fig.add_trace(go.Scatter(
+    #     y = results['neu'],
+
+    #     x = results['decade'],
+    #     name= 'Neutral',
+    #     mode= 'lines+markers',
+    #     line=dict(
+    #         color='rgba(36, 60, 156, 0.8)',
+    #         shape='spline',
+    #         width = 4
+    #         ),
+    #     marker=dict(
+    #         symbol="arrow",
+    #         size=20,
+    #         angleref="previous",
+    #         ))
+    # )
+
+    fig.update_layout(
+    plot_bgcolor='rgba(0,0,0,0)',
+
+    font = dict(
+        size = 40
+    ),
+
+    title = dict(
+        text= '',
+        x = 0.5, 
+        y = 0.8
+    ),
+    xaxis = dict(
+        title = 'Decade',
+        gridcolor='rgba(0,0,0,0)',
+        showline=True,
+        linewidth=1,
+        linecolor='rgba(0,0,0,0.2)'
+    ),
+    yaxis = dict(
+        title = '',
+        tickmode = 'array',
+        tickvals= list(range(0, 12, 1)),
+        range = [0, 11],
+        gridcolor='rgba(0,0,0,0.2)')
+    )
+
+    fig.show()
+
 
 def line_charts(rootdir):
+    '''This function creates line charts based on the desired word to track over time'''
 
     words_to_analyze = ['love', 'hate', 'man', 'woman', 'heart', 'time', 'day', 'night']
 
@@ -198,8 +312,6 @@ def line_charts(rootdir):
                       words_to_analyze[5]: pd.Series(dtype='int'),
                       words_to_analyze[6]: pd.Series(dtype='int'),
                       words_to_analyze[7]: pd.Series(dtype='int')})
-
-    #df = pd.DataFrame(columns=words_to_analyze, dtype=int)
 
     for subdir, dirs, files in os.walk(rootdir):
         for file in files:
@@ -238,28 +350,13 @@ def line_charts(rootdir):
                             else:
                                 continue
 
-
-                        # if word.lower() == words_to_analyze[0]:
-                        #     match_count += 1
-                        # else:
-                        #     continue
-
                     df.loc[len(df)] = [(num / len(list_of_words))*100 for num in words_count]
-
-                    # df.loc[len(df)] = [subdir[-4:], round((match_count/len(list_of_words)*100), 5)]
-
-    #plot with plotly
 
     fig = px.line(df)
     fig.show()
 
-    #df = df.sort_values('decade', ascending=True)
-    # print(df)
-    # df.plot.line(stacked=True)
-    # plt.show()
-
-
 def nltk_stuff(rootdir):
+    '''This function analyzes the songs lyrics based on different nltk functionalities'''
     for subdir, dirs, files in os.walk(rootdir):
         for file in files:
             if file == 'full_lyrics_clean.txt':
@@ -312,9 +409,6 @@ def nltk_stuff(rootdir):
                     # Sentiment Analyizer --> VADER (Valence Aware Dict and sEntiment Reasoner)
                     # SEE FUNCTION ABOVE DEFINED
 
-#### HACER UNA FUNCION QUE LEA LA DF O LA CREEE Y LA LIMPIE y returnee tres dfs: 1 todo, sin stopw,
-# sin verbos
-
 def data_creator(rootdir: str):
     '''Function to read csv with the data of all the countries and
         the words filtered in two formats, one without stopwords
@@ -360,14 +454,84 @@ def data_creator(rootdir: str):
 
     return df, words_nstp, words_nstp_nvrbs
 
+## Bump chart
 
+df = pd.DataFrame({'decade': ['50s', '60s', '70s', '80s', '90s', '2000s', '2010s', '2020s'],
+                  'Romantic': [1, 1, 1, 1, 1, 1, 1, 3],
+                  'Nostalgic': [3, 2, 3, 3, 4, 4, 3, 4],
+                  'Musical': [2, 3, 2, 2, 2, 3, 4, 4],
+                  'Flexing': [4, 4, 4, 4, 3, 2, 2, 1]})
 
+data = {"Romantic":[1, 1, 1, 1, 1, 1, 1, 3],
+        "Nostalgic":[3, 2, 3, 3, 4, 4, 3, 2],
+        "Musical":[2, 3, 2, 2, 2, 3, 4, 4],
+        "Flexing":[4, 4, 4, 4, 3, 2, 2, 1]}
+df = pd.DataFrame(data, index=['50s', '60s', '70s', '80s', '90s', '2000s', '2010s', '2020s'])
 
+plt.figure(figsize=(10, 5))
 
-#create_country_files(rootdir=rootdir)
-#graphs(rootdir=rootdir)
-#word_cloud(rootdir=rootdir)
-#sentiment_analyzer(rootdir=rootdir)
-#line_charts(rootdir=rootdir)
-#nltk_stuff(rootdir=rootdir)
-data_creator(rootdir=rootdir)
+def bumpchart(df, show_rank_axis= True, rank_axis_distance= 1.1, 
+              ax= None, scatter= False, holes= False,
+              line_args= {}, scatter_args= {}, hole_args= {}):
+    
+    if ax is None:
+        left_yaxis= plt.gca()
+    else:
+        left_yaxis = ax
+
+    # Creating the right axis.
+    right_yaxis = left_yaxis.twinx()
+    
+    axes = [left_yaxis, right_yaxis]
+    
+    # Creating the far right axis if show_rank_axis is True
+    if show_rank_axis:
+        far_right_yaxis = left_yaxis.twinx()
+        axes.append(far_right_yaxis)
+    
+    for col in df.columns:
+        y = df[col]
+        x = df.index.values
+        # Plotting blank points on the right axis/axes 
+        # so that they line up with the left axis.
+        for axis in axes[1:]:
+            axis.plot(x, y, alpha= 0)
+
+        left_yaxis.plot(x, y, **line_args, solid_capstyle='round')
+        
+        # Adding scatter plots
+        if scatter:
+            left_yaxis.scatter(x, y, **scatter_args)
+            
+            #Adding see-through holes
+            if holes:
+                bg_color = left_yaxis.get_facecolor()
+                left_yaxis.scatter(x, y, color= bg_color, **hole_args)
+
+    # Number of lines
+    lines = len(df.columns)
+
+    y_ticks = [*range(1, lines + 1)]
+    
+    # Configuring the axes so that they line up well.
+    for axis in axes:
+        axis.invert_yaxis()
+        axis.set_yticks(y_ticks)
+        axis.set_ylim((lines + 0.5, 0.5))
+    
+    # Sorting the labels to match the ranks.
+    left_labels = df.iloc[0].sort_values().index
+    right_labels = df.iloc[-1].sort_values().index
+    
+    left_yaxis.set_yticklabels(left_labels)
+    right_yaxis.set_yticklabels(right_labels)
+    
+    # Setting the position of the far right axis so that it doesn't overlap with the right axis
+    if show_rank_axis:
+        far_right_yaxis.spines["right"].set_position(("axes", rank_axis_distance))
+    
+    return axes
+
+bumpchart(df, show_rank_axis= True, scatter= True, holes= False,
+          line_args= {"linewidth": 5, "alpha": 0.5}, scatter_args= {"s": 100, "alpha": 0.8})
+plt.show()
